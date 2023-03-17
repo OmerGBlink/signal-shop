@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Product } from './product.type';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -35,26 +35,27 @@ export class AppComponent {
     this.getProducts();
   }
 
-  getProducts() {
-    firstValueFrom(
+  async getProducts() {
+    const products = await firstValueFrom(
       this.http.get<Product[]>('https://fakestoreapi.com/products')
-    ).then((products) => this.products.set(products));
+    );
+    this.products.set(products);
   }
 
-  getCategories() {
-    firstValueFrom(
+  async getCategories() {
+    const categories = await firstValueFrom(
       this.http.get<string[]>('https://fakestoreapi.com/products/categories')
-    ).then((categories) => this.categories.set(['All', ...categories]));
+    );
+    this.categories.set(['All', ...categories]);
   }
 
-  getProductsByCategory(category: string) {
-    firstValueFrom(
+  async getProductsByCategory(category: string) {
+    const products = await firstValueFrom(
       this.http.get<Product[]>(
         `https://fakestoreapi.com/products/category/${category}`
       )
-    ).then((products) => {
-      this.products.set(products);
-    });
+    );
+    this.products.set(products);
   }
 
   selectCategory(category: string) {
