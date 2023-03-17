@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { Product } from './product.type';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { ProductDetailsDialogComponent } from './product-details-dialog.component';
 @Component({
   selector: 'app-root',
   styleUrls: ['./app.component.scss'],
@@ -20,6 +22,15 @@ import { firstValueFrom } from 'rxjs';
           <mat-card-title>{{ product.title }}</mat-card-title>
         </mat-card-header>
         <img mat-card-image [src]="product.image" />
+        <mat-card-actions>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="openProductDetailsDialog(product)"
+          >
+            View Product
+          </button>
+        </mat-card-actions>
       </mat-card>
     </div>
   `,
@@ -27,10 +38,9 @@ import { firstValueFrom } from 'rxjs';
 export class AppComponent {
   products = signal<Product[]>([]);
   categories = signal<string[]>([]);
-
   selectedCategory = signal<string>('All');
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private matDialog: MatDialog) {
     this.getCategories();
     this.getProducts();
   }
@@ -66,5 +76,17 @@ export class AppComponent {
     } else {
       this.getProductsByCategory(this.selectedCategory());
     }
+  }
+
+  async openProductDetailsDialog(p: Product) {
+    let product = await firstValueFrom(
+      this.http.get<Product>(`https://fakestoreapi.com/products/${p.id}`)
+    );
+
+    this.matDialog.open(ProductDetailsDialogComponent, {
+      data: { product: signal<Product>(product) },
+      width: '500px',
+      height: '300px',
+    });
   }
 }

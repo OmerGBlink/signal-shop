@@ -13,9 +13,11 @@ import { MatCardModule } from '@angular/material/card';
 import { NgOptimizedImage } from '@angular/common';
 import { RaceConditionSimulatorInterceptor } from './race-condition-simulator.interceptor';
 import { CategoryListComponent } from './category-list.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { ProductDetailsDialogComponent } from './product-details-dialog.component';
 
 @NgModule({
-  declarations: [AppComponent, EffectDirective, CategoryListComponent],
+  declarations: [AppComponent, EffectDirective, CategoryListComponent, ProductDetailsDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -26,6 +28,7 @@ import { CategoryListComponent } from './category-list.component';
     MatGridListModule,
     MatCardModule,
     NgOptimizedImage,
+    MatDialogModule,
   ],
   providers: [
     {
