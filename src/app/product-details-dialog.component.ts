@@ -1,11 +1,5 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  inject,
-  Inject,
-  Signal,
-} from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Component, inject, Signal } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Product } from './product.type';
 
 @Component({
@@ -17,7 +11,6 @@ import { Product } from './product.type';
         {{ data.product().description }}
       </div>
       <div mat-dialog-actions class="actions">
-        <button mat-button (click)="close()">close</button>
         <div class="space"></div>
         <p>{{ data.product().price | currency }}</p>
         <button mat-button color="primary">Add to card</button>
@@ -45,9 +38,4 @@ import { Product } from './product.type';
 })
 export class ProductDetailsDialogComponent {
   data: { product: Signal<Product> } = inject(MAT_DIALOG_DATA);
-  dialogRef = inject(MatDialogRef);
-
-  close() {
-    this.dialogRef.close();
-  }
 }
