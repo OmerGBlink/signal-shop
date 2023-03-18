@@ -9,10 +9,6 @@ import { Observable } from 'rxjs';
 export class ShopService {
   http = inject(HttpClient);
 
-  getProducts() {
-    return this.http.get<Product[]>('https://fakestoreapi.com/products');
-  }
-
   getProduct(productId: number) {
     return this.http.get<Product>(
       `https://fakestoreapi.com/products/${productId}`
@@ -20,6 +16,10 @@ export class ShopService {
   }
 
   getProductsByCategory(category: string) {
+    if (category === 'All') {
+      return this.http.get<Product[]>('https://fakestoreapi.com/products');
+    }
+
     return this.http.get<Product[]>(
       `https://fakestoreapi.com/products/category/${category}`
     );

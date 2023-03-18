@@ -47,13 +47,7 @@ export class AppComponent {
     private shopService: ShopService
   ) {
     this.getCategories();
-    this.getProducts();
-  }
-
-  async getProducts() {
-    const products$ = this.shopService.getProducts();
-    const products = await firstValueFrom(products$);
-    this.products.set(products);
+    this.getProductsByCategory('All');
   }
 
   async getCategories() {
@@ -71,12 +65,7 @@ export class AppComponent {
 
   selectCategory(category: string) {
     this.selectedCategory.set(category);
-
-    if (this.selectedCategory() === 'All') {
-      this.getProducts();
-    } else {
-      this.getProductsByCategory(this.selectedCategory());
-    }
+    this.getProductsByCategory(this.selectedCategory());
   }
 
   async openProductDetailsDialog(p: Product) {
