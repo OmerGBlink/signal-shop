@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductDetailsDialogComponent } from './product-details-dialog.component';
+import { ShopService } from './shop.service';
 @Component({
   selector: 'app-root',
   styleUrls: ['./app.component.scss'],
@@ -40,31 +41,31 @@ export class AppComponent {
   categories = signal<string[]>([]);
   selectedCategory = signal<string>('All');
 
-  constructor(private http: HttpClient, private matDialog: MatDialog) {
+  constructor(
+    private http: HttpClient,
+    private matDialog: MatDialog,
+    private shopService: ShopService
+  ) {
     this.getCategories();
     this.getProducts();
   }
 
   async getProducts() {
-    const products = await firstValueFrom(
-      this.http.get<Product[]>('https://fakestoreapi.com/products')
-    );
+    const products$ = this.shopService.getProducts();
+    const products = await firstValueFrom(products$);
     this.products.set(products);
   }
 
   async getCategories() {
-    const categories = await firstValueFrom(
-      this.http.get<string[]>('https://fakestoreapi.com/products/categories')
-    );
+    const categories$ = this.shopService.getCategories();
+    const categories = await firstValueFrom(categories$);
     this.categories.set(['All', ...categories]);
   }
 
   async getProductsByCategory(category: string) {
-    const products = await firstValueFrom(
-      this.http.get<Product[]>(
-        `https://fakestoreapi.com/products/category/${category}`
-      )
-    );
+    const productsByCategory$ =
+      this.shopService.getProductsByCategory(category);
+    const products = await firstValueFrom(productsByCategory$);
     this.products.set(products);
   }
 
@@ -79,9 +80,8 @@ export class AppComponent {
   }
 
   async openProductDetailsDialog(p: Product) {
-    let product = await firstValueFrom(
-      this.http.get<Product>(`https://fakestoreapi.com/products/${p.id}`)
-    );
+    const product$ = this.shopService.getProduct(p.id);
+    const product = await firstValueFrom(product$);
 
     this.matDialog.open(ProductDetailsDialogComponent, {
       data: { product: signal<Product>(product) },
