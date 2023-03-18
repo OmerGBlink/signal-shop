@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Product } from './product.type';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +26,8 @@ export class ShopService {
   }
 
   getCategories() {
-    return this.http.get<string[]>(
-      'https://fakestoreapi.com/products/categories'
-    );
+    return this.http
+      .get<string[]>('https://fakestoreapi.com/products/categories')
+      .pipe(map((categories) => ['All', ...categories]));
   }
 }
