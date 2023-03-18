@@ -53,7 +53,7 @@ export class AppComponent {
   async getCategories() {
     const categories$ = this.shopService.getCategories();
     const categories = await firstValueFrom(categories$);
-    this.categories.set(['All', ...categories]);
+    this.categories.set(categories);
   }
 
   async getProductsByCategory(category: string) {
