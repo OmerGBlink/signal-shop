@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { Product } from './product.type';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductDetailsDialogComponent } from './product-details-dialog.component';
 import { ShopService } from './shop.service';
+
 @Component({
   selector: 'app-root',
   styleUrls: ['./app.component.scss'],
@@ -41,11 +41,7 @@ export class AppComponent {
   categories = signal<string[]>([]);
   selectedCategory = signal<string>('All');
 
-  constructor(
-    private http: HttpClient,
-    private matDialog: MatDialog,
-    private shopService: ShopService
-  ) {
+  constructor(private matDialog: MatDialog, private shopService: ShopService) {
     this.getCategories();
     this.getProductsByCategory('All');
   }
