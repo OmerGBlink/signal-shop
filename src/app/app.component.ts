@@ -1,9 +1,16 @@
 import { Component, signal } from '@angular/core';
 import { Product } from './product.type';
-import { firstValueFrom } from 'rxjs';
+import {
+  exhaustMap,
+  firstValueFrom,
+  startWith,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductDetailsDialogComponent } from './product-details-dialog.component';
 import { ShopService } from './shop.service';
+import { fromObservable, registerRxEffect } from './rx-interop';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +21,7 @@ import { ShopService } from './shop.service';
       class="categories"
       [categories]="categories()"
       [selectedCategory]="selectedCategory()"
-      (categorySelected)="selectCategory($event)"
+      (categorySelected)="selectedCategorySubject.next($event)"
     ></app-category-list>
 
     <div *effect class="grid">
@@ -27,7 +34,7 @@ import { ShopService } from './shop.service';
           <button
             mat-raised-button
             color="primary"
-            (click)="openProductDetailsDialog(product)"
+            (click)="productDetailsSubject.next(product)"
           >
             View Product
           </button>
@@ -37,41 +44,39 @@ import { ShopService } from './shop.service';
   `,
 })
 export class AppComponent {
-  products = signal<Product[]>([]);
+  selectedCategorySubject = new Subject<string>();
+  productDetailsSubject = new Subject<Product>();
+  product$ = this.productDetailsSubject.pipe(
+    exhaustMap((product) => {
+      return this.shopService.getProduct(product.id);
+    })
+  );
+  selectedCategory$ = this.selectedCategorySubject.pipe(startWith('All'));
+
+  products$ = this.selectedCategory$.pipe(
+    switchMap((category) => {
+      return this.shopService.getProductsByCategory(category);
+    })
+  );
+  products = fromObservable(this.products$);
   categories = signal<string[]>([]);
-  selectedCategory = signal<string>('All');
+  selectedCategory = fromObservable(this.selectedCategory$);
 
   constructor(private matDialog: MatDialog, private shopService: ShopService) {
     this.getCategories();
-    this.getProductsByCategory('All');
+
+    registerRxEffect(this.product$, (product) => {
+      this.matDialog.open(ProductDetailsDialogComponent, {
+        data: { product: signal<Product>(product) },
+        width: '500px',
+        height: '300px',
+      });
+    });
   }
 
   async getCategories() {
     const categories$ = this.shopService.getCategories();
     const categories = await firstValueFrom(categories$);
     this.categories.set(categories);
-  }
-
-  async getProductsByCategory(category: string) {
-    const productsByCategory$ =
-      this.shopService.getProductsByCategory(category);
-    const products = await firstValueFrom(productsByCategory$);
-    this.products.set(products);
-  }
-
-  selectCategory(category: string) {
-    this.selectedCategory.set(category);
-    this.getProductsByCategory(this.selectedCategory());
-  }
-
-  async openProductDetailsDialog(p: Product) {
-    const product$ = this.shopService.getProduct(p.id);
-    const product = await firstValueFrom(product$);
-
-    this.matDialog.open(ProductDetailsDialogComponent, {
-      data: { product: signal<Product>(product) },
-      width: '500px',
-      height: '300px',
-    });
   }
 }
